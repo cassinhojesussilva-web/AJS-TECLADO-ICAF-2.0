@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Teclado Musical Virtual</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom, #222, #444);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      padding: 20px;
+      font-size: 2rem;
+      color: #ffcc00;
+    }
+    #instructions {
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      color: #ddd;
+    }
+    #keyboard {
+      display: flex;
+      justify-content: center;
+      flex-wrap: nowrap;
+      transform-origin: center;
+      transition: transform 0.2s;
+      overflow-x: auto;
+      padding: 20px;
+      background: #333;
+    }
+    .key {
+      width: 50px;
+      height: 200px;
+      margin: 1px;
+      border: 1px solid #000;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 0 0 5px 5px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      font-size: 0.7rem;
+    }
+    .white {
+      background: white;
+      color: black;
+      z-index: 1;
+    }
+    .black {
+      background: black;
+      color: white;
+      width: 35px;
+      height: 120px;
+      margin-left: -20px;
+      margin-right: -20px;
+      z-index: 2;
+      position: relative;
+    }
+    .key:active {
+      background: #ffcc00;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎹 Teclado Musical Virtual</h1>
+  <p id="instructions">Toque nas teclas para ouvir o som.<br>
+  Funciona no computador e no celular 📱💻</p>
+  <div id="keyboard"></div>
+
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Notas disponíveis
+    const notes = [
+      "C4","C#4","D4","D#4","E4",
+      "F4","F#4","G4","G#4","A4","A#4","B4",
+      "C5"
+    ];
+
+    const keyboard = document.getElementById("keyboard");
+
+    // Cria teclas
+    notes.forEach(note => {
+      const key = document.createElement("div");
+      key.classList.add("key");
+      if (note.includes("#")) {
+        key.classList.add("black");
+      } else {
+        key.classList.add("white");
+      }
+      key.textContent = note.replace("4","").replace("5",""); // só exibe letra
+      key.addEventListener("mousedown", () => playSound(note));
+      key.addEventListener("touchstart", () => playSound(note));
+      keyboard.appendChild(key);
+    });
+
+    // Frequências aproximadas (escala temperada)
+    const frequencies = {
+      "C4": 261.63, "C#4": 277.18, "D4": 293.66, "D#4": 311.13, "E4": 329.63,
+      "F4": 349.23, "F#4": 369.99, "G4": 392.00, "G#4": 415.30,
+      "A4": 440.00, "A#4": 466.16, "B4": 493.88,
+      "C5": 523.25
+    };
+
+    // Tocar som
+    function playSound(note) {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = frequencies[note];
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+      osc.stop(audioCtx.currentTime + 1);
+    }
+  </script>
+</body>
+</html>
+
+Z
